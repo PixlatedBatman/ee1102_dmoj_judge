@@ -1,4 +1,4 @@
-FROM python:3.14-slim-trixie
+FROM python:3.12-slim-trixie
 
 RUN apt-get update && \
     apt-get install -y \
@@ -13,7 +13,7 @@ RUN apt-get update && \
 
 RUN npm install -g sass@1.99.0 postcss-cli postcss autoprefixer
 RUN pip3 install \
-        pymysql mysqlclient websocket-client uwsgi django-redis redis
+        pymysql mysqlclient websocket-client uwsgi django-redis redis openpyxl
 
 COPY repo/requirements.txt .
 RUN pip3 install -r requirements.txt
