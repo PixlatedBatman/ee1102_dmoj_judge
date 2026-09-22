@@ -1,0 +1,16 @@
+# Secrets
+ADMIN_CREDENTIALS.txt
+dmoj-docker/dmoj/environment/*.env
+
+# Runtime data: database, problem test data (hidden cases!), uploads, student stats, backups
+dmoj-docker/dmoj/database/
+dmoj-docker/dmoj/problems/
+dmoj-docker/dmoj/media/
+dmoj-docker/dmoj/repo/exports/
+backups/
+
+# Local clone only used to build the judge image once (see judge-image/)
+judge-server/
+
+__pycache__/
+*.pyc
