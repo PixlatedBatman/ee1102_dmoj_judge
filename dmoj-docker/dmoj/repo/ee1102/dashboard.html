@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TA Dashboard</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #fff; --text: #1d2330; --muted: #6b7280; --line: #e3e6eb;
+    --ac: #1f9d55; --ac-bg: #e3f5ea; --part: #b7791f; --part-bg: #fcf1dc; --bad: #c53030; --bad-bg: #fbe3e3;
+    --none-bg: #f0f1f4; --accent: #2b6cb0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12151b; --panel: #1b2029; --text: #e6e9ef; --muted: #9aa3b2; --line: #2c3340;
+      --ac: #4cc38a; --ac-bg: #173826; --part: #e0b35a; --part-bg: #3a2f16; --bad: #f07575; --bad-bg: #3d1e1e;
+      --none-bg: #232935; --accent: #6ea8ec;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding: 14px 20px; background: var(--panel); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 2; }
+  header h1 { font-size: 17px; margin: 0 8px 0 0; }
+  header .spacer { flex: 1; }
+  select, input, button, a.btn { font: inherit; color: var(--text); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 5px 9px; }
+  a { color: var(--accent); text-decoration: none; }
+  a.btn, button { cursor: pointer; }
+  a.btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  main { padding: 16px 20px 40px; display: grid; gap: 16px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; }
+  .card .v { font-size: 22px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .card .k { color: var(--muted); font-size: 12px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px; overflow-x: auto; }
+  section h2 { font-size: 14px; margin: 0 0 10px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  section h2 .tools { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; font-weight: 400; }
+  table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+  th, td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+  th { color: var(--muted); font-weight: 500; font-size: 12px; cursor: pointer; user-select: none; }
+  td.num, th.num { text-align: right; }
+  .cell { display: inline-block; min-width: 64px; padding: 2px 6px; border-radius: 4px; text-align: center; font-size: 12px; }
+  .cell.ac { background: var(--ac-bg); color: var(--ac); }
+  .cell.part { background: var(--part-bg); color: var(--part); }
+  .cell.bad { background: var(--bad-bg); color: var(--bad); }
+  .cell.none { background: var(--none-bg); color: var(--muted); }
+  .bar { display: flex; height: 10px; border-radius: 3px; overflow: hidden; min-width: 160px; background: var(--none-bg); }
+  .bar span { display: block; height: 100%; }
+  .muted { color: var(--muted); }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 900px) { .grid2 { grid-template-columns: 1fr; } }
+  svg text { fill: var(--muted); font-size: 10px; }
+  .legend span { margin-right: 10px; font-size: 12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>TA Dashboard</h1>
+  <select id="contest"></select>
+  <span id="links"></span>
+  <span class="spacer"></span>
+  <span id="judges" class="muted"></span>
+  <span id="updated" class="muted"></span>
+  <a class="btn primary" id="export" href="#">Export stats (.xlsx)</a>
+</header>
+<main>
+  <div id="empty" class="card" hidden>No contests yet. Create one in <a href="/admin/judge/contest/">admin</a>.</div>
+  <div class="cards" id="cards"></div>
+  <section>
+    <h2>Problems</h2>
+    <table id="problems"></table>
+    <div class="legend" id="legend" style="margin-top:8px"></div>
+  </section>
+  <section>
+    <h2>Students
+      <span class="tools">
+        <input id="search" placeholder="Filter username/name" size="18">
+        <select id="unsolved"><option value="">All students</option></select>
+        <label><input type="checkbox" id="inactive"> only not yet submitted</label>
+      </span>
+    </h2>
+    <table id="students"></table>
+  </section>
+  <div class="grid2">
+    <section><h2>Submissions per 5 min</h2><div id="timeline"></div></section>
+    <section><h2>Latest submissions <a href="/submissions/" class="muted" style="font-weight:400">all &rarr;</a></h2><table id="recent"></table></section>
+  </div>
+</main>
+<script>
+const VCOL = {AC: 'var(--ac)', WA: 'var(--bad)', TLE: '#d97706', MLE: '#9333ea', OLE: '#0891b2', IR: '#db2777',
+              RTE: '#7c2d12', CE: '#64748b', IE: '#111827', AB: '#94a3b8'};
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtTime = s => s ? new Date(s).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) : '';
+const ago = s => { if (!s) return ''; const m = Math.round((Date.now() - new Date(s)) / 60000); return m < 1 ? 'just now' : m < 60 ? m + 'm ago' : Math.round(m / 60) + 'h ago'; };
+
+let state = {contest: new URLSearchParams(location.search).get('contest') || '', data: null, sort: ['total', -1]};
+
+async function load() {
+  try {
+    const r = await fetch('/ta/data/' + (state.contest ? '?contest=' + encodeURIComponent(state.contest) : ''), {credentials: 'same-origin'});
+    if (!r.ok) throw new Error(r.status);
+    const j = await r.json();
+    renderHeader(j);
+    state.data = j.data;
+    $('empty').hidden = !!j.data;
+    if (j.data) render();
+    $('updated').textContent = 'updated ' + new Date().toLocaleTimeString();
+  } catch (e) {
+    $('updated').textContent = 'update failed (' + e.message + ')';
+  }
+}
+
+function renderHeader(j) {
+  const sel = $('contest');
+  const cur = j.data ? j.data.contest.key : '';
+  sel.innerHTML = j.contests.map(c => `<option value="${esc(c.key)}"${c.key === cur ? ' selected' : ''}>${esc(c.name)} (${esc(c.key)})</option>`).join('');
+  $('judges').innerHTML = j.judges.map(x => `<span title="ping ${x.ping ?? '-'}s, load ${x.load ?? '-'}"><span class="dot" style="background:${x.online ? 'var(--ac)' : 'var(--bad)'}"></span>${esc(x.name)}</span>`).join(' &nbsp;');
+  if (cur) {
+    $('export').href = `/ta/export/${encodeURIComponent(cur)}.xlsx`;
+    $('links').innerHTML = `<a href="/contest/${cur}/ranking/">Scoreboard</a> &middot; <a href="/contest/${cur}/stats">Built-in stats</a> &middot; <a href="/submissions/">All submissions</a> &middot; <a href="/admin/judge/contest/">Admin</a>`;
+  }
+}
+
+function render() {
+  const d = state.data, s = d.summary;
+  const cards = [
+    ['Students joined', `${s.joined}/${s.students}`], ['Have submitted', `${s.submitted}/${s.students}`],
+    ['Active (last 5 min)', s.active_5min], ['Submissions', s.submissions],
+    ['Accepted', s.ac], ['In queue', s.pending],
+    ['Ends', new Date(d.contest.end).toLocaleString([], {month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'})],
+  ];
+  $('cards').innerHTML = cards.map(([k, v]) => `<div class="card"><div class="v">${esc(v)}</div><div class="k">${k}</div></div>`).join('');
+
+  $('problems').innerHTML = '<tr><th>Problem</th><th class="num">Points</th><th class="num">Attempted</th><th class="num">Solved</th><th class="num">Submissions</th><th class="num">AC rate</th><th class="num">Avg tries to solve</th><th class="num">Avg score</th><th>Verdicts</th></tr>' +
+    d.problems.map(p => {
+      const tot = Object.values(p.verdicts).reduce((a, b) => a + b, 0) || 1;
+      const bar = Object.entries(p.verdicts).map(([v, n]) => `<span title="${v}: ${n}" style="width:${100 * n / tot}%;background:${VCOL[v] || '#999'}"></span>`).join('');
+      return `<tr><td><a href="/problem/${esc(p.code)}">${esc(p.code)}</a> <span class="muted">${esc(p.name)}</span></td><td class="num">${p.points}</td><td class="num">${p.attempted}</td>
+        <td class="num">${p.solved}/${s.students}</td><td class="num">${p.submissions}${p.pending ? ` <span class="muted">(${p.pending} queued)</span>` : ''}</td>
+        <td class="num">${p.ac_rate ?? '–'}${p.ac_rate != null ? '%' : ''}</td><td class="num">${p.avg_attempts_to_solve ?? '–'}</td><td class="num">${p.avg_score}</td>
+        <td><div class="bar">${bar}</div></td></tr>`;
+    }).join('');
+  const used = new Set(d.problems.flatMap(p => Object.keys(p.verdicts)));
+  $('legend').innerHTML = [...used].map(v => `<span><span class="dot" style="background:${VCOL[v]}"></span>${v}</span>`).join('');
+
+  const un = $('unsolved'), prev = un.value;
+  un.innerHTML = '<option value="">All students</option>' + d.problems.map(p => `<option value="${esc(p.code)}">Not solved: ${esc(p.code)}</option>`).join('');
+  un.value = prev;
+  renderStudents();
+
+  $('recent').innerHTML = '<tr><th>Time</th><th>User</th><th>Problem</th><th>Result</th><th class="num">Tests</th></tr>' +
+    d.recent.map(r => {
+      const cls = r.result === 'AC' ? 'ac' : ['QU', 'P', 'G'].includes(r.status) ? 'none' : r.passed > 0 ? 'part' : 'bad';
+      return `<tr><td>${fmtTime(r.date)}</td><td>${esc(r.user)}</td><td>${esc(r.problem)}</td>
+        <td><a href="/submission/${r.id}"><span class="cell ${cls}">${esc(r.result)}</span></a></td><td class="num">${r.passed}/${r.cases}</td></tr>`;
+    }).join('');
+
+  renderTimeline(d.timeline);
+}
+
+function renderStudents() {
+  const d = state.data, q = $('search').value.toLowerCase(), un = $('unsolved').value, onlyIdle = $('inactive').checked;
+  const codes = d.problems.map(p => p.code);
+  let rows = d.students.filter(r =>
+    (!q || r.username.toLowerCase().includes(q) || (r.name || '').toLowerCase().includes(q)) &&
+    (!un || !(r.problems[un] && r.problems[un].solved)) && (!onlyIdle || !r.last));
+  const [key, dir] = state.sort;
+  const val = r => key === 'username' ? r.username : key === 'last' ? (r.last || '') :
+    codes.includes(key) ? (r.problems[key] ? r.problems[key].best : -1) : r[key];
+  rows.sort((a, b) => { const x = val(a), y = val(b); return (x < y ? -1 : x > y ? 1 : 0) * dir || a.username.localeCompare(b.username); });
+  const th = (k, label, cls = '') => `<th class="${cls}" data-k="${k}">${label}${state.sort[0] === k ? (state.sort[1] > 0 ? ' ▲' : ' ▼') : ''}</th>`;
+  $('students').innerHTML = '<tr>' + th('username', 'Student') + th('total', `Score /${d.contest.max_score}`, 'num') + th('solved', 'Solved', 'num') +
+    th('attempts', 'Tries', 'num') + codes.map(c => th(c, esc(c))).join('') + th('last', 'Last submission') + '</tr>' +
+    rows.map(r => `<tr><td><a href="/contest/${esc(d.contest.key)}/submissions/${esc(r.username)}/">${esc(r.username)}</a> <span class="muted">${esc(r.name)}</span>${r.joined ? '' : ' <span class="muted">(not joined)</span>'}</td>
+      <td class="num">${r.total}</td><td class="num">${r.solved}</td><td class="num">${r.attempts}</td>` +
+      codes.map(c => {
+        const p = r.problems[c];
+        if (!p) return '<td><span class="cell none">–</span></td>';
+        const cls = p.solved ? 'ac' : p.best > 0 ? 'part' : 'bad';
+        return `<td><a href="/contest/${esc(d.contest.key)}/submissions/${esc(r.username)}/${esc(c)}/" title="best ${p.best} pts, ${p.attempts} tries${p.first_ac_min != null ? ', solved at ' + p.first_ac_min + ' min' : ''}"><span class="cell ${cls}">${p.passed}/${p.cases} · ${p.attempts}×</span></a></td>`;
+      }).join('') + `<td class="muted">${r.last ? fmtTime(r.last) + ' (' + ago(r.last) + ')' : '—'}</td></tr>`).join('');
+  $('students').querySelectorAll('th[data-k]').forEach(el => el.onclick = () => {
+    const k = el.dataset.k; state.sort = [k, state.sort[0] === k ? -state.sort[1] : (k === 'username' ? 1 : -1)]; renderStudents();
+  });
+}
+
+function renderTimeline(tl) {
+  if (!tl.length) { $('timeline').innerHTML = '<span class="muted">No submissions yet.</span>'; return; }
+  const W = 560, H = 140, max = Math.max(...tl.map(x => x[1])), bw = Math.max(2, Math.min(24, (W - 30) / tl.length - 2));
+  const bars = tl.map(([t, n], i) => {
+    const h = (H - 24) * n / max, x = 30 + i * (bw + 2);
+    return `<rect x="${x}" y="${H - 16 - h}" width="${bw}" height="${h}" rx="2" fill="var(--accent)"><title>${fmtTime(t)}: ${n}</title></rect>` +
+      (i % Math.ceil(tl.length / 8) === 0 ? `<text x="${x}" y="${H - 3}">${fmtTime(t)}</text>` : '');
+  }).join('');
+  $('timeline').innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}"><text x="0" y="12">${max}</text><text x="0" y="${H - 16}">0</text>${bars}</svg>`;
+}
+
+$('contest').onchange = e => { state.contest = e.target.value; history.replaceState(null, '', '?contest=' + encodeURIComponent(state.contest)); load(); };
+['search', 'unsolved', 'inactive'].forEach(id => $(id).addEventListener('input', () => state.data && renderStudents()));
+load();
+setInterval(() => { if (!document.hidden) load(); }, 10000);
+</script>
+</body>
+</html>
