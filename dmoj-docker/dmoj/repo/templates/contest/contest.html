@@ -185,7 +185,9 @@
         {% endcache %}
     </div>
 
-    {% if contest.ended or request.user.is_superuser or is_editor or is_tester or (is_spectator and contest.started) %}
+    {# EE1102: list problems to everyone once started; solve stats only for staff; links once joined. #}
+    {% set ee_staff = request.user.is_staff or is_editor or is_tester %}
+    {% if contest.started or ee_staff %}
         <hr>
         <div class="contest-problems">
             <h2 style="margin-bottom: 0.2em"><i class="fa fa-fw fa-question-circle"></i>{{ _('Problems') }} </h2>
@@ -194,8 +196,10 @@
                 <tr>
                     <th>{{ _('Problem') }}</th>
                     <th>{{ _('Points') }}</th>
+                    {% if ee_staff %}
                     <th>{{ _('AC Rate') }}</th>
                     <th>{{ _('Users') }}</th>
+                    {% endif %}
                     {% if metadata.has_public_editorials %}
                         <th>{{ _('Editorials') }}</th>
                     {% endif %}
@@ -205,13 +209,15 @@
                 {% for problem in contest_problems %}
                     <tr>
                         <td>
-                            {% if problem.is_public or request.user.is_superuser or is_editor %}
+                            {% if problem.is_public or request.user.is_superuser or is_editor or has_joined %}
                                 <a href="{{ url('problem_detail', problem.code) }}">{{ problem.i18n_name or problem.name }}</a>
                             {% else %}
                                 {{ problem.i18n_name or problem.name }}
+                                <span class="note" style="color:#888">({{ _('join to open') }})</span>
                             {% endif %}
                         </td>
                         <td>{{ problem.points|floatformat }}{% if problem.partial %}p{% endif %}</td>
+                        {% if ee_staff %}
                         <td>{{ problem.ac_rate|floatformat(1) }}%</td>
                         <td>
                             {% if problem.is_public %}
@@ -220,6 +226,7 @@
                                 {{ problem.user_count }}
                             {% endif %}
                         </td>
+                        {% endif %}
                         {% if metadata.has_public_editorials %}
                             <td>
                                 {% if problem.is_public and problem.has_public_editorial %}
