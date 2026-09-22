@@ -46,6 +46,8 @@ def comet_location(request):
     else:
         websocket = settings.EVENT_DAEMON_GET
         poll = settings.EVENT_DAEMON_POLL
+    # EE1102: fill {host} per request so the same config works on localhost and behind the tunnel.
+    websocket = websocket.replace('{host}', request.get_host())
     return {'EVENT_DAEMON_LOCATION': websocket,
             'EVENT_DAEMON_POLL_LOCATION': poll}
 
