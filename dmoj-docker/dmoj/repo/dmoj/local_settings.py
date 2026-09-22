@@ -18,10 +18,14 @@ HOST = os.environ.get('HOST', '')
 
 # Uncomment and set to the domain names this site is intended to serve.
 # You must do this once you set DEBUG to False.
-ALLOWED_HOSTS = [HOST]
+ALLOWED_HOSTS = ['*']
+CSRF_TRUSTED_ORIGINS = [o.strip() for o in os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',') if o.strip()]
+# Cloudflare tunnel terminates TLS and sets X-Forwarded-Proto.
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
 
 # Optional apps that DMOJ can make use of.
-INSTALLED_APPS += ()
+INSTALLED_APPS += ('ee1102',)
 
 # Caching. You can use memcached or redis instead.
 # Documentation: <https://docs.djangoproject.com/en/1.11/topics/cache/>
@@ -54,8 +58,9 @@ DATABASES = {
 
 # Internationalization.
 # Documentation: <https://docs.djangoproject.com/en/1.11/topics/i18n/>
-LANGUAGE_CODE = 'en-ca'
-DEFAULT_USER_TIME_ZONE = 'America/Toronto'
+LANGUAGE_CODE = 'en'
+DEFAULT_USER_TIME_ZONE = 'Asia/Kolkata'
+TIME_ZONE = 'Asia/Kolkata'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
@@ -133,8 +138,8 @@ STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesSto
 ############################################
 
 ## DMOJ site display settings.
-SITE_NAME = 'DMOJ'
-SITE_LONG_NAME = 'DMOJ: Modern Online Judge'
+SITE_NAME = 'EE1102'
+SITE_LONG_NAME = 'EE1102 Python Session'
 SITE_ADMIN_EMAIL = 'admin@example.com'
 TERMS_OF_SERVICE_URL = None
 
@@ -142,7 +147,8 @@ TERMS_OF_SERVICE_URL = None
 # The judge connection address and port; where the judges will connect to the site.
 # You should change this to something your judges can actually connect to 
 # (e.g., a port that is unused and unblocked by a firewall).
-BRIDGED_JUDGE_ADDRESS = [('bridged', 9999)]
+# Listen on all interfaces inside the container (judges reach it over the compose network; not published to host).
+BRIDGED_JUDGE_ADDRESS = [('0.0.0.0', 9999)]
 
 # The bridged daemon bind address and port to communicate with the site.
 BRIDGED_DJANGO_ADDRESS = [('bridged', 9998)]
@@ -166,8 +172,8 @@ EVENT_DAEMON_POST = 'ws://wsevent:15101/'
 
 # These are the publicly accessed interface configurations.
 # They should match those used by the script.
-EVENT_DAEMON_GET = 'ws://{host}/event/'.format(host=HOST)
-EVENT_DAEMON_GET_SSL = 'wss://{host}/event/'.format(host=HOST)
+EVENT_DAEMON_GET = 'ws://{host}/event/'
+EVENT_DAEMON_GET_SSL = 'wss://{host}/event/'
 EVENT_DAEMON_POLL = '/channels/'
 
 # If you would like to use the AMQP-based event server from <https://github.com/DMOJ/event-server>,
@@ -214,31 +220,11 @@ DMOJ_PDF_PROBLEM_CACHE = '/pdfcache'
 DMOJ_PDF_PROBLEM_INTERNAL = '/pdfcache'
 
 
-DMOJ_USER_DATA_DOWNLOAD = True
+DMOJ_USER_DATA_DOWNLOAD = False
 DMOJ_USER_DATA_CACHE = '/datacache'
 DMOJ_USER_DATA_INTERNAL = '/datacache'
 
-#############
-## Mathoid ##
-#############
-# Documentation: https://github.com/wikimedia/mathoid
-MATHOID_URL = 'http://mathoid:10044'
-MATHOID_CACHE_ROOT = '/cache/mathoid/'
-MATHOID_CACHE_URL = '//{host}/mathoid/'.format(host=HOST)
-
-############
-## Pdfoid ##
-############
-
-DMOJ_PDF_PDFOID_URL = 'http://pdfoid:8888'
-
-############
-## Texoid ##
-############
-
-TEXOID_URL = 'http://texoid:8888'
-TEXOID_CACHE_ROOT = '/cache/texoid/'
-TEXOID_CACHE_URL = '//{host}/texoid/'.format(host=HOST)
+DMOJ_PDF_PDFOID_URL = None
 
 ## ======== Logging Settings ========
 # Documentation: https://docs.djangoproject.com/en/1.9/ref/settings/#logging
@@ -264,7 +250,7 @@ LOGGING = {
     'loggers': {
         '': {
             'handlers': ['console'],
-            'level': 'DEBUG',
+            'level': 'INFO',
         },
     },
 }
@@ -304,3 +290,10 @@ DMOJ_RESOURCES = '/assets/resources/'
 
 MEDIA_ROOT = '/media/'
 MEDIA_URL = '/media/'
+
+## ======== EE1102 customisations ========
+ROOT_URLCONF = 'ee1102.urls'
+MIDDLEWARE += ('ee1102.middleware.RestrictStudentPagesMiddleware',)
+DMOJ_PROBLEM_DATA_ROOT = '/problems/'
+DMOJ_SUBMISSION_SOURCE_VISIBILITY = 'only-own'
+DEFAULT_USER_LANGUAGE = 'PY3'
