@@ -12,34 +12,6 @@ services:
     image: redis:alpine
     restart: always
     networks: [site]
-  texoid:
-    build:
-      context: .
-      dockerfile: ./texoid/Dockerfile
-    image: ninjaclasher/dmoj-texoid
-    init: true
-    restart: unless-stopped
-    networks: [site]
-  pdfoid:
-    build:
-      context: .
-      dockerfile: ./pdfoid/Dockerfile
-    image: ninjaclasher/dmoj-pdfoid
-    init: true
-    restart: unless-stopped
-    networks: [site]
-    cap_add:
-      - SYS_ADMIN
-  mathoid:
-    build:
-      context: .
-      dockerfile: ./mathoid/Dockerfile
-    image: ninjaclasher/dmoj-mathoid
-    init: true
-    restart: unless-stopped
-    volumes:
-      - ./mathoid/config.yaml:/node_modules/mathoid/config.yaml
-    networks: [site]
   base:
     build:
       context: .
@@ -64,7 +36,7 @@ services:
       - ./problems/:/problems/
       - ./repo/:/site/
     working_dir: /site/
-    env_file: [environment/mysql.env, environment/site.env]
+    env_file: [environment/mysql.env, environment/site.env, environment/judge.env]
     networks: [site, nginx, db]
     depends_on: [base, db, redis]
   celery:
@@ -100,8 +72,6 @@ services:
     working_dir: /site/
     env_file: [environment/mysql.env, environment/site.env]
     networks: [site, nginx, db]
-    ports:
-      - 9999:9999
     depends_on: [base, db, redis]
   wsevent:
     build:
@@ -120,7 +90,7 @@ services:
     image: nginx:alpine
     restart: always
     ports:
-      - 80:80
+      - ${DMOJ_PORT:-8080}:80
     volumes:
       - assets:/assets/
       - pdfcache:/pdfcache/
@@ -130,6 +100,24 @@ services:
       - ./nginx/conf.d/:/etc/nginx/conf.d/
     networks: [nginx]
     depends_on: [site, wsevent]
+  judge1: &judge
+    image: dmoj/judge-tier1:latest
+    restart: unless-stopped
+    cap_add: [SYS_PTRACE]
+    security_opt: [seccomp=unconfined]
+    volumes:
+      - ./problems/:/problems/:ro
+      - ./judge/start.sh:/start.sh:ro
+    env_file: [environment/judge.env]
+    environment:
+      JUDGE_NAME: judge1
+    entrypoint: ["/bin/bash", "/start.sh"]
+    networks: [nginx]
+    depends_on: [bridged]
+  judge2:
+    <<: *judge
+    environment:
+      JUDGE_NAME: judge2
 networks:
   site:
   db:
