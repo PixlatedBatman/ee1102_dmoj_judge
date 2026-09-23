@@ -48,7 +48,7 @@
     {% include "comments/media-js.html" %}
     {% if contest_problem %}
         {# EE1102: inline submit editor #}
-        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.3/ace.js"></script>{# same as settings.ACE_URL; ACE_URL is not in template context #}
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.44.0/ace.js"></script>{# same as settings.ACE_URL; ACE_URL is not in template context #}
         <script type="text/javascript" src="{{ static('django_ace/widget.js') }}"></script>
         <script type="text/javascript">
             // Registered after widget.js's own 'load' listener, so the editor (window.ace_source) exists by then.

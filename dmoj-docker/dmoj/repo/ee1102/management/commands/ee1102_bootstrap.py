@@ -65,6 +65,7 @@ class Command(BaseCommand):
         if not Language.objects.filter(key='PY3').exists():
             call_command('loaddata', 'language_small', verbosity=0)
         Language.objects.exclude(key='PY3').filter(submission__isnull=True).delete()
+        Language.objects.filter(key='PY3', ace='').update(ace='python')  # fixture leaves the editor mode blank
         self.stdout.write('Languages: ' + ', '.join(Language.objects.values_list('key', flat=True)))
 
     def judges(self):

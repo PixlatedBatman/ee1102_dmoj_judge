@@ -3,6 +3,13 @@
 {% block js_media %}
     <script type="text/javascript" src="{{ ACE_URL }}/ace.js"></script>
     {{ form.media.js }}
+    <script type="text/javascript">
+        // EE1102: set the editor mode on load; upstream only sets it when the language changes.
+        window.addEventListener('load', function () {
+            var lang = $('#id_language').find('option:selected').attr('data-ace');
+            if (window.ace_source && lang) window.ace_source.getSession().setMode('ace/mode/' + lang);
+        });
+    </script>
     {% compress js %}
         <script type="text/javascript">
             $(function () {
