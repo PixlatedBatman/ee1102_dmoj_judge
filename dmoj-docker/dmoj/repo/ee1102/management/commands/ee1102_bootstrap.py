@@ -17,13 +17,13 @@ JUDGES = ('judge1', 'judge2')
 NAVBAR = [('problems', 'Problems', '/problems/', r'^/problem'), ('contest', 'Contests', '/contests/', r'^/contest'),
           ('submit', 'My submissions', '/submissions/', r'^/submi|^/src/')]
 
-TEST_DESCRIPTION = """Read two integers $a$ and $b$ on one line and print their sum.
+TEST_DESCRIPTION = """Read two integers ~a~ and ~b~ on one line and print their sum.
 
 ## Input Format
-One line with two space-separated integers $a$ and $b$ ($-10^9 \\le a, b \\le 10^9$).
+One line with two space-separated integers ~a~ and ~b~ (~-10^9 \\le a, b \\le 10^9~).
 
 ## Output Format
-A single integer, $a + b$.
+A single integer, ~a + b~.
 
 ## Sample Input 1
 ```

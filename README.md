@@ -23,7 +23,7 @@ Self-hosted DMOJ on this laptop. Everything (site, DB, judges) runs locally in D
 - No self-signup (accounts created by TA). No forced password change on login (DMOJ's breached-password check disabled).
 
 ## Adding a problem
-1. Admin → Problems → Add. Code (e.g. `p1`), name, statement (Markdown; put visible examples as `## Sample Input 1` / `## Sample Output 1` blocks), group `ee1102`, time limit, memory limit (KB, e.g. 262144), points, **Allows partial points** ✔, allowed languages **Python 3**, **not** publicly visible.
+1. Admin → Problems → Add. Code (e.g. `p1`), name, statement (Markdown; put visible examples as `## Sample Input 1` / `## Sample Output 1` blocks; math is `~x^2~` inline and `$$...$$` display — **not** `$x$`), group `ee1102`, time limit, memory limit (KB, e.g. 262144), points, **Allows partial points** ✔, allowed languages **Python 3**, **not** publicly visible.
 2. Open `/problem/<code>/test_data`: upload a zip of `1.in, 1.out, 2.in, ...`, set each case **points = 1** (so score = tests passed), save. Include the visible samples as the first cases.
 3. Add it to the contest (Admin → Contests → problems inline).
 
