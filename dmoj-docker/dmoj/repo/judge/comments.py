@@ -65,7 +65,8 @@ class CommentedDetailView(TemplateResponseMixin, SingleObjectMixin, View):
         self.object = self.get_object()
         page = self.get_comment_page()
 
-        if self.is_comment_locked():
+        # EE1102: DMOJ_ENABLE_COMMENTS only hides the form upstream; also refuse posts when it's off.
+        if not settings.DMOJ_ENABLE_COMMENTS or self.is_comment_locked():
             return HttpResponseForbidden()
 
         parent = request.POST.get('parent')

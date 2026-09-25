@@ -297,3 +297,6 @@ MIDDLEWARE += ('ee1102.middleware.RestrictStudentPagesMiddleware',)
 DMOJ_PROBLEM_DATA_ROOT = '/problems/'
 DMOJ_SUBMISSION_SOURCE_VISIBILITY = 'only-own'
 DEFAULT_USER_LANGUAGE = 'PY3'
+# No public comment boxes (they were being confused with the code editor, and could leak solutions).
+DMOJ_ENABLE_COMMENTS = False
+DMOJ_ENABLE_SOCIAL = False  # no Facebook/Twitter share buttons
