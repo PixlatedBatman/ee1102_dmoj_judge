@@ -28,6 +28,13 @@ Self-hosted DMOJ on this laptop. Everything (site, DB, judges) runs locally in D
 3. Add it to the contest (Admin → Contests → problems inline).
 4. Optional **Starter code**: on the problem's admin page, fill the *Starter code* box at the bottom. Students' editor starts with it (their own saved draft takes priority) and gets a *Reset to starter code* button.
 
+## Function problems (TA Session problem set)
+The TA Session's 8 problems ("Your Turn" slides) are **function problems**: students write only the function, the judge calls it and compares the **return value** with a reference solution.
+- Spec (statements, starter code, reference solutions, visible + hidden tests): `dmoj-docker/dmoj/repo/ee1102/problemsets/tasession.py`. Contains the **solutions and hidden tests**: keep the GitHub repo private (at least until after the session).
+- Load / reload after editing the spec: `./ee1102.sh manage ee1102_problemset tasession` (checks every reference solution against the slide examples, writes test data + grader to `problems/<code>/`, updates problems, starter code and contest order).
+- Judge harness: `ee1102/problemsets/harness.py`. Student `print`s are ignored; feedback for returning `None`, modifying the input, returning the input list instead of a new one, and a missing function.
+- **Don't** edit these problems' test data via `/problem/<code>/test_data` on the site: saving there overwrites the custom grader. Edit the spec and reload instead.
+
 ## Creating the real contest
 Admin → Contests → Add: key, name, start/end (wide window, no per-user time limit), **Scoreboard visibility = Hidden permanently**, publicly visible ✔, not rated, format `default`, add problems (points, partial ✔). Students must click **Join** on the contest page. The contest page lists problems (name + points only, no AC rate/solve counts) once the contest starts; links open after joining. Also reachable via **Problems** in the top menu.
 
