@@ -178,4 +178,67 @@ The buggy code is already in the editor below.""",
         hidden=[([1, 2, 2, 1],), ([5],), ([2, 1, 1, 2, 3],), ([4, 5, 6],), ([-1, -1, 0],), (['a', 'b', 'b'],),
                 ([7, 8, 8, 9, 9, 9, 8],), ([_rng.randint(1, 20) for _ in range(1000)],)],
     ),
+    dict(
+        code='spiral', name='Putting It Together: Grids', function='spiral',
+        description="""Write a function `spiral(grid)`. `grid` is a rectangular grid given as a list of rows
+(it may be `[]`, with no rows). Return a list of all its values in **clockwise spiral** order, starting
+at the top-left: along the top row, down the right column, back along the bottom row, up the left
+column, then the same again on the inside.
+
+`grid` must **not** change (the judge checks!).""",
+        examples=[
+            (([[1, 2, 3], [4, 5, 6], [7, 8, 9]],), [1, 2, 3, 6, 9, 8, 7, 4, 5],
+             'spiral([[1, 2, 3], [4, 5, 6], [7, 8, 9]])   # [1, 2, 3, 6, 9, 8, 7, 4, 5]'),
+            (([[1, 2, 3, 4], [5, 6, 7, 8]],), [1, 2, 3, 4, 8, 7, 6, 5],
+             'spiral([[1, 2, 3, 4], [5, 6, 7, 8]])        # [1, 2, 3, 4, 8, 7, 6, 5]'),
+            (([[1], [2], [3]],), [1, 2, 3], 'spiral([[1], [2], [3]])                    # [1, 2, 3]'),
+            (([],), [], 'spiral([])                                 # []'),
+        ],
+        hint=('Keep four boundaries: `top`, `bottom`, `left`, `right`. After walking one side, move that '
+              'boundary inwards. When there is only one row or column left, make sure you don\'t walk back over it.'),
+        starter='def spiral(grid):\n    # your code here\n    pass\n',
+        solution=('def spiral(grid):\n    out = []\n    if not grid:\n        return out\n'
+                  '    top, bottom, left, right = 0, len(grid) - 1, 0, len(grid[0]) - 1\n'
+                  '    while top <= bottom and left <= right:\n'
+                  '        for j in range(left, right + 1):\n            out.append(grid[top][j])\n        top += 1\n'
+                  '        for i in range(top, bottom + 1):\n            out.append(grid[i][right])\n        right -= 1\n'
+                  '        if top <= bottom:\n            for j in range(right, left - 1, -1):\n'
+                  '                out.append(grid[bottom][j])\n            bottom -= 1\n'
+                  '        if left <= right:\n            for i in range(bottom, top - 1, -1):\n'
+                  '                out.append(grid[i][left])\n            left += 1\n    return out\n'),
+        hidden=[([[7]],), ([[1, 2, 3, 4, 5]],), ([[1, 2], [3, 4]],),
+                ([[r * 4 + c for c in range(4)] for r in range(4)],),
+                ([[r * 5 + c for c in range(5)] for r in range(3)],),
+                ([[r * 3 + c for c in range(3)] for r in range(5)],),
+                ([['a', 'b'], ['c', 'd'], ['e', 'f']],),
+                ([[r * 10 + c for c in range(10)] for r in range(10)],),
+                ([[r * 7 + c for c in range(7)] for r in range(20)],)],
+    ),
+    dict(
+        code='mergeintervals', name='Putting It Together: Intervals', function='merge_intervals',
+        description="""Write a function `merge_intervals(intervals)`. `intervals` is a list of `[start, end]`
+pairs of whole numbers (`start <= end`), in **any order**. Merge every group of overlapping intervals
+into one, and return a **new** list of the merged intervals, sorted by start. Intervals that just touch
+(like `[1, 4]` and `[4, 5]`) count as overlapping.
+
+The original `intervals` (including the pairs inside it) must **not** change (the judge checks!).""",
+        examples=[
+            (([[1, 3], [2, 6], [8, 10], [15, 18]],), [[1, 6], [8, 10], [15, 18]],
+             'merge_intervals([[1, 3], [2, 6], [8, 10], [15, 18]])   # [[1, 6], [8, 10], [15, 18]]'),
+            (([[1, 4], [4, 5]],), [[1, 5]], 'merge_intervals([[1, 4], [4, 5]])                     # [[1, 5]]  (touching)'),
+            (([[5, 6], [1, 2]],), [[1, 2], [5, 6]], 'merge_intervals([[5, 6], [1, 2]])                     # [[1, 2], [5, 6]]'),
+            (([],), [], 'merge_intervals([])                                   # []'),
+        ],
+        hint=('Sort first (`sorted(intervals)` sorts by start). Then each interval either extends the last merged '
+              'one or starts a new one. Careful: `sorted()` makes a new outer list, but the pairs inside are '
+              'the **same** lists as in the input.'),
+        starter='def merge_intervals(intervals):\n    # your code here\n    pass\n',
+        solution=('def merge_intervals(intervals):\n    out = []\n    for s, e in sorted(intervals):\n'
+                  '        if out and s <= out[-1][1]:\n            out[-1][1] = max(out[-1][1], e)\n'
+                  '        else:\n            out.append([s, e])\n    return out\n'),
+        hidden=[([[1, 10], [2, 3], [4, 5]],), ([[3, 3]],), ([[1, 2], [2, 3], [3, 4]],), ([[8, 9], [1, 5], [4, 8]],),
+                ([[1, 2], [1, 2]],), ([[1, 2], [3, 4]],), ([[-5, -1], [-2, 2], [10, 20]],),
+                ([[5, 10], [1, 20]],),
+                ([[a, a + _rng.randint(0, 30)] for a in (_rng.randint(0, 5000) for _ in range(500))],)],
+    ),
 ]
