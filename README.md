@@ -26,6 +26,7 @@ Self-hosted DMOJ on this laptop. Everything (site, DB, judges) runs locally in D
 1. Admin → Problems → Add. Code (e.g. `p1`), name, statement (Markdown; put visible examples as `## Sample Input 1` / `## Sample Output 1` blocks; math is `~x^2~` inline and `$$...$$` display — **not** `$x$`), group `ee1102`, time limit, memory limit (KB, e.g. 262144), points, **Allows partial points** ✔, allowed languages **Python 3**, **not** publicly visible.
 2. Open `/problem/<code>/test_data`: upload a zip of `1.in, 1.out, 2.in, ...`, set each case **points = 1** (so score = tests passed), save. Include the visible samples as the first cases.
 3. Add it to the contest (Admin → Contests → problems inline).
+4. Optional **Starter code**: on the problem's admin page, fill the *Starter code* box at the bottom. Students' editor starts with it (their own saved draft takes priority) and gets a *Reset to starter code* button.
 
 ## Creating the real contest
 Admin → Contests → Add: key, name, start/end (wide window, no per-user time limit), **Scoreboard visibility = Hidden permanently**, publicly visible ✔, not rated, format `default`, add problems (points, partial ✔). Students must click **Join** on the contest page. The contest page lists problems (name + points only, no AC rate/solve counts) once the contest starts; links open after joining. Also reachable via **Problems** in the top menu.

@@ -57,10 +57,17 @@
                 var key = 'ee-draft:{{ problem.code }}';
                 (function (editor) {
                     if (!editor) return;
-                    try {
-                        var draft = localStorage.getItem(key);
-                        if (draft) editor.getSession().setValue(draft);
-                    } catch (err) {}
+                    var starter = $('#ee-starter').val() || '';
+                    var draft = null;
+                    try { draft = localStorage.getItem(key); } catch (err) {}
+                    if (draft) editor.getSession().setValue(draft);
+                    else if (starter) editor.getSession().setValue(starter);
+                    $('#ee-reset-starter').on('click', function () {
+                        if (confirm('{{ _('Replace your code with the starter code?') }}')) {
+                            editor.getSession().setValue(starter);
+                            editor.focus();
+                        }
+                    });
                     editor.getSession().on('change', function () {
                         try { localStorage.setItem(key, editor.getSession().getValue()); } catch (err) {}
                     });
@@ -378,8 +385,15 @@
                         {% for lang in ee_langs %}<option value="{{ lang.id }}">{{ lang.display_name }}</option>{% endfor %}
                     </select>
                 {% endif %}
+                {% set ee_starter = problem.ee_starter %}
+                {% if ee_starter and ee_starter.code %}
+                    <textarea id="ee-starter" hidden disabled>{{ ee_starter.code }}</textarea>
+                {% endif %}
                 <div style="margin-top: 0.6em; display: flex; align-items: center; gap: 1em">
                     <button type="submit" class="button">{{ _('Submit') }}</button>
+                    {% if ee_starter and ee_starter.code %}
+                        <button type="button" id="ee-reset-starter" class="button" style="background: #888">{{ _('Reset to starter code') }}</button>
+                    {% endif %}
                     <span style="color: #888">{{ _('Ctrl+Enter to submit. Your code is saved in this browser.') }}</span>
                 </div>
             </form>
