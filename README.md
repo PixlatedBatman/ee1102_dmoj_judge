@@ -67,8 +67,11 @@ Run: `cloudflared tunnel run ee1102`. `https://ee1102.karthikkashyap.com` is alr
 
 Websockets + https detection work behind the tunnel. Keep the laptop plugged in with sleep disabled.
 
-## Student accounts (later)
-Pending roster CSV — bulk-create script to be added.
+## Student accounts
+160 accounts `ee26b001` … `ee26b160`, **password = username** (no roster was available).
+- Create more / re-run (existing accounts untouched): `./ee1102.sh manage ee1102_create_users --prefix ee26b --start 1 --end 160`
+- Reset a range back to password = username: add `--reset-passwords` (e.g. `--start 42 --end 42` for one student).
+- Students can change their own password from their profile.
 
 ## Notes / layout
 - `dmoj-docker/dmoj/` — compose setup. Secrets in `environment/*.env`. DB data in `database/`, problem data in `problems/`.
