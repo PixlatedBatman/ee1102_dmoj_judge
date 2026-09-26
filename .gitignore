@@ -14,3 +14,5 @@ judge-server/
 
 __pycache__/
 *.pyc
+
+analysis/
