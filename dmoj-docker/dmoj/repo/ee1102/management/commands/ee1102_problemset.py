@@ -91,7 +91,7 @@ class Command(BaseCommand):
         with open(os.path.join(root, 'grader.py'), 'w') as f:
             f.write(grader_source(p['function'], p.get('must_be_new', False)))
         with open(os.path.join(root, 'checker.py'), 'w') as f:
-            f.write(checker_source(p['function']))
+            f.write(checker_source(p['function'], len(p['examples'])))
         init = {
             'archive': 'tests.zip', 'custom_judge': 'grader.py', 'checker': 'checker.py',
             'test_cases': [{'in': f'{i}.in', 'out': f'{i}.out', 'points': 1} for i in range(1, len(cases) + 1)],

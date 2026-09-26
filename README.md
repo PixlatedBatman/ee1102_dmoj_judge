@@ -33,6 +33,8 @@ The TA Session's 10 problems (8 "Your Turn" slides + 2 "Putting It Together" cha
 - Spec (statements, starter code, reference solutions, visible + hidden tests): `dmoj-docker/dmoj/repo/ee1102/problemsets/tasession.py`. Contains the **solutions and hidden tests**: keep the GitHub repo private (at least until after the session).
 - Load / reload after editing the spec: `./ee1102.sh manage ee1102_problemset tasession` (checks every reference solution against the slide examples, writes test data + grader to `problems/<code>/`, updates problems, starter code and contest order).
 - Judge harness: `ee1102/problemsets/harness.py`. Student `print`s are ignored; feedback for returning `None`, modifying the input, returning the input list instead of a new one, and a missing function.
+- Failed **example** tests (the visible ones from the statement) show *Judge feedback* on the submission page: what the function returned vs. expected. Hidden tests show only the verdict.
+- Change checkers during a live session without touching tests: regenerate only `checker.py` (atomic replace); judges re-read it per submission, no restart needed.
 - **Don't** edit these problems' test data via `/problem/<code>/test_data` on the site: saving there overwrites the custom grader. Edit the spec and reload instead.
 
 ## Creating the real contest
